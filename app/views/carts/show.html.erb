@@ -1,0 +1,27 @@
+<h2>Cart</h2>
+<% if @current_cart.order_items.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @current_cart.order_items.each do |item| %>
+        <tr>
+          <td><%= item.product.title %></td>
+          <td><%= item.product.price %></td>
+          <td><%= item.quantity %></td>
+          <td>
+            <%= link_to "Remove", product_order_item_path(item.product, item), method: :delete %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+    <p> There are no items in your cart </p>
+<% end %>

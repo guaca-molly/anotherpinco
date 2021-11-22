@@ -1,0 +1,87 @@
+<h1>Checkout</h1>
+
+Total number of items: <%= @order.order_items.size %>
+
+<%= simple_form_for @order do |f| %>
+  <%= f.input :first_name %>
+  <%= f.input :last_name %>
+  <%= f.input :email %>
+  <%= f.input :country %>
+  <%= f.input :address_1 %>
+  <%= f.input :address_2 %>
+  <%= f.input :city %>
+  <%= f.input :postcode %>
+
+  <div id="card-errors">
+    <% @order.errors[:stripe_token].each do |message| %>
+      <p class="error"><%= message %></p>
+    <% end %>
+  </div>
+  <div id="card-element"></div>
+
+  <%= f.button :submit, "Submit order" %>
+
+<% end %>
+
+<script>
+
+    var stripe = Stripe("<%= Rails.application.credentials[Rails.env.to_sym][:stripe_public_key] %>")
+    
+ 
+    var elements = stripe.elements();
+
+
+    var styles = {
+        base: {
+            fontSize: '16px',
+            color: '#32325d',
+        },
+    };
+
+ 
+    var card = elements.create("card", {style: styles, hidePostalCode: true});
+
+  
+    card.mount("#card-element");
+
+
+    var form = document.getElementById('new_order');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        stripe.createToken(card).then((result) => {
+            if (result.error) {
+
+            var errorElement = document.getElementById("card-errors");
+            errorElement.textContent = result.error.message;
+            
+            } else {
+
+                stripeTokenHandler(result.token);
+            }
+        });
+    });
+
+
+    var stripeTokenHandler = (token) => {
+
+        console.log(token.id);
+
+
+        var form = document.getElementById('new_order');
+
+
+        var hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'order[stripe_token]');
+        hiddenInput.setAttribute('value', token.id);
+        form.appendChild(hiddenInput);
+
+
+    form.submit();
+    }
+
+</script>
+
+    
